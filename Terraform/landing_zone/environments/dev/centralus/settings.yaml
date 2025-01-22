@@ -1,0 +1,41 @@
+# Network Parameters
+network_rules: Allow
+paas_public: true
+dns: ["10.30.16.197","10.30.16.229"]
+azfw_zones: [1]
+
+
+# Hub VNET
+hub_cidr: "10.30.8.0/22"
+gateway_cidr: "10.30.8.0/26"
+azfw_cidr: "10.30.8.64/26"
+bastion_cidr: "10.30.8.128/26"
+dns01_cidr: "10.30.8.192/27"
+dns02_cidr: "10.30.8.224/27"
+dns03_cidr: "10.30.9.0/27"
+dns04_cidr: "10.30.9.32/27"
+
+# Management VNET
+mgmt_cidr: "10.30.12.0/22"
+devops_cidr: "10.30.12.64/26"
+pe_cidr: "10.30.12.0/26"
+shared_cidr: "10.30.12.128/26"
+
+
+# On-Prem Network Address Spaces
+onprem01: "10.0.0.0/8"
+onprem02: "172.16.0.0/12"
+vpn_prefix: "10.200.1.0/24"
+vpn_pip1: "1.2.3.4"
+
+# VM Parameters
+vm_count: 2
+devops_vm_count: 1
+vm_size1: "Standard_B2ms"
+vm_size2: "Standard_DS2_v2"
+
+# Governance Parameters
+enforce_policy: false
+costcenter_tag: 7941
+owner_tag: "Owner"
+team_tag: Azure_Architects
