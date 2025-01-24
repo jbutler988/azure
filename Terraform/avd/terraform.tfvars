@@ -8,7 +8,7 @@ subscription_id     = "620f7fa6-934f-401b-9619-f064dc556cc5"
 location = "eastus2"       #Allowed values= "eastus", "westus", "centralus", "southcentralus"
 
 # Resource group names
-resource_group_name= ""
+resource_group_name = "avd-module-deploy-test-rg"
 
 # Tags
 ## Update per environment
@@ -21,10 +21,10 @@ tags = {
 ###########################################################################################################################
 ## Network Variables
 # Virtual network name
-vnet_name = "vnet-platform-network-prd-eus-001"
-subnet_name = ""
-subnet_id = "value"
-
+# vnet_name = "vnet-platform-network-prd-eus-001"
+# subnet_name = "avd-deploy-test-subnet"
+# subnet_id = ""
+# 
 # # Virtual network address space
 # vnet_address_space = [
 #     "10.0.0.0/16"
@@ -48,19 +48,20 @@ avd_workspace_name          = "ws-platform-avd-prd-eus-001"
 avd_workspace_description   = "UPDATE_LATER"
 
 # AVD host pool name
-avd_hostpool_name           = "hp-platform-avd-prd-eus-001"
-
-# Host pool type
-host_pool_type              = "Pooled"                       #Allowed values= "Pooled", "Personal"
+avd_hostpool_name_prefix_pooled           = "hp-platform-avd-prd-eus-pooled-001"
+avd_hostpool_name_prefix_personal         = "hp-platform-avd-prd-eus-personal-001"
 
 # Load balancer type
 load_balancer_type          = "DepthFirst"                 #Allowed values= "BreadthFirst", "DepthFirst"
 
 # AVD application group name
-avd_app_group_name          = "app-platform-avd-prd-eus-001"
+avd_pooled_app_group_name        = "app-platform-avd-prd-eus-pooled-001"
+avd_personal_app_group_name      = "app-platform-avd-prd-eus-personal-001"
 
 # AVD application group type
-avd_app_group_type          = "Desktop"                      #Allowed values= "Desktop", "RemoteApp"
+avd_pooled_app_group_type        = "Desktop"                      #Allowed values= "Desktop", "RemoteApp"
+avd_personal_app_group_type      = "Desktop"                      #Allowed values= "Desktop", "RemoteApp"
+
 
 # # AVD subnet name
 # avd_subnet_name             = "snet-platform-avd"

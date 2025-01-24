@@ -8,26 +8,25 @@ variable "location" {
     type        = string
 }
 
-variable "virtual_network_name" {
-    description = "The name of the virtual network."
-    type        = string
-}
-
-variable "subnet_name" {
-    description = "The name of the subnet within the virtual network."
-    type        = string
-}
-
-variable "subnet_id" {
-    description = "The ID of the subnet within the virtual network."
-    type        = string  
-}
-
 variable "tags" {
     description = "A map of tags to assign to the resources."
-    type        = map(string)
-    default     = {}
+    type        = map(string)  
 }
+
+# variable "virtual_network_name" {
+#     description = "The name of the virtual network."
+#     type        = string
+# }
+# 
+# variable "subnet_name" {
+#     description = "The name of the subnet within the virtual network."
+#     type        = string
+# }
+# 
+# variable "subnet_id" {
+#     description = "The ID of the subnet within the virtual network."
+#     type        = string  
+# }
 
 variable "avd_workspace_name" {
     description = "The name of the Azure Virtual Desktop workspace."
@@ -39,7 +38,7 @@ variable "avd_workspace_description" {
     type        = string
 }
 
-variable "avd_hostpool_name" {
+variable "avd_hostpool_name_prefix_pooled" {
     description = "The name of the Azure Virtual Desktop host pool."
     type        = string
 }
@@ -47,6 +46,7 @@ variable "avd_hostpool_name" {
 variable "host_pool_type" {
     description = "The type of the Azure Virtual Desktop host pool."
     type        = string
+    default     = "Pooled" # Allowed values= "Pooled", "Personal", "SingleUser"
 }
 
 variable "load_balancer_type" {

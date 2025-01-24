@@ -1,9 +1,4 @@
-variable "resource_group_name_prefix" {
-    description = "Prefix for the resource group names"
-    type        = string
-}
-
-variable "resource_group_name_suffix" {
+variable "resource_group_name" {
     description = "Suffix for the resource group names"
     type        = string
 }
