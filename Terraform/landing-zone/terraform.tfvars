@@ -2,15 +2,21 @@
 
 ## Shared Variables
 # Set the Azure subscription ID
-#subscription_id     = "620f7fa6-934f-401b-9619-f064dc556cc5" # SHI-Corp-Services-1
-subscription_id     = "e0bb7e5f-1bc2-4525-8719-d80996c04508" # SHI-Corp-Services-2
+subscription_id     = "620f7fa6-934f-401b-9619-f064dc556cc5"
 
 # Define the target Azure region
-location = "eastus"       #Allowed values= "eastus", "westus", "centralus", "southcentralus"
+location = "eastus2"       #Allowed values= "eastus", "westus", "centralus", "southcentralus"
 
 # Resource group names
 resource_group_name_prefix = "rg-platform-"
 resource_group_name_suffix = "-prd-eus-001"
+
+# Tags
+## Update per environment
+tags = {
+    owner        = "Jeremy Butler"
+    owner-email  = "jeremy.butler@shi.com"
+}
 
 
 ###########################################################################################################################
@@ -34,12 +40,6 @@ services_subnet_address_prefix  = "10.0.5.0/24"
 ###########################################################################################################################
 ## AVD Variables
 
-# AVD Admin username
-admin_username              = "sysadmin"
-
-# AVD Admin password
-admin_password              = "P@ssw0rd1234"
-
 # AVD workspace name
 avd_workspace_name          = "ws-platform-avd-prd-eus-001"
 
@@ -53,7 +53,7 @@ avd_hostpool_name           = "hp-platform-avd-prd-eus-001"
 host_pool_type              = "Pooled"                       #Allowed values= "Pooled", "Personal"
 
 # Load balancer type
-load_balancer_type          = "BreadthFirst"                 #Allowed values= "BreadthFirst", "DepthFirst"
+load_balancer_type          = "DepthFirst"                 #Allowed values= "BreadthFirst", "DepthFirst"
 
 # AVD application group name
 avd_app_group_name          = "app-platform-avd-prd-eus-001"
@@ -67,14 +67,14 @@ avd_subnet_name             = "snet-platform-avd"
 # AVD subnet address prefix
 avd_subnet_address_prefix   = "10.0.1.0/24"
 
-# Session host VM variables
-host_vm_name                = "az01avd001-100"
-host_vm_size                = "Standard_D2s_v3"             #Allowed values= "Standard_D2s_v3", "Standard_D4s_v3"
-host_vm_image_publisher     = "MicrosoftWindowsDesktop"     #Allowed values= "MicrosoftWindowsDesktop"
-host_vm_image_offer         = "Windows-10"                  #Allowed values= "Windows-10"
-host_vm_image_sku           = "20h2-evd"                    #Allowed values= "20h2-evd"
-host_vm_image_version       = "latest"                      #Allowed values= "latest"
-host_vm_managed_disk_type   = "Standard_LRS"                #Allowed values= "Standard_LRS", "Premium_LRS"
+# # Session host VM variables
+# host_vm_name                = ""
+# host_vm_size                = "Standard_D2s_v3"             #Allowed values= "Standard_D2s_v3", "Standard_D4s_v3"
+# host_vm_image_publisher     = "MicrosoftWindowsDesktop"     #Allowed values= "MicrosoftWindowsDesktop"
+# host_vm_image_offer         = "Windows-10"                  #Allowed values= "Windows-10"
+# host_vm_image_sku           = "20h2-evd"                    #Allowed values= "20h2-evd"
+# host_vm_image_version       = "latest"                      #Allowed values= "latest"
+# host_vm_managed_disk_type   = "Standard_LRS"                #Allowed values= "Standard_LRS", "Premium_LRS"
 
 
 ###########################################################################################################################
@@ -130,7 +130,7 @@ dc_vm_size = [                                      #Allowed values= "Standard_D
 ]
 
 dc_admin_username = "sysadmin"
-dc_admin_password = "P@ssw0rd1234"
+dc_admin_password = "P@ssw0rd1234"   #ToDo: Build a key vault to store this password
 
 domain_controller_image_publisher   = "MicrosoftWindowsServer"    #Allowed values= "MicrosoftWindowsServer"
 domain_controller_image_offer       = "WindowsServer"             #Allowed values= "WindowsServer"

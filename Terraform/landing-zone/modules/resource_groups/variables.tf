@@ -12,3 +12,8 @@ variable "location" {
     description = "The location where the resource groups will be created"
     type        = string
 }
+
+variable "tags" {
+    description = "The tags to be assigned to the resource groups"
+    type        = map(string)
+}

@@ -5,8 +5,8 @@ module "RESOURCE_GROUPS" {
   location                    = var.location
   resource_group_name_prefix  = var.resource_group_name_prefix
   resource_group_name_suffix  = var.resource_group_name_suffix
+  tags                        = var.tags
 }
-# Reminder, remove tags from resource group before deploying to MiTek
 
 module "NETWORKING" {
   source                          = "./modules/networking"
@@ -80,10 +80,6 @@ module "AVD" {
   resource_group_name         = module.RESOURCE_GROUPS.PLATFORM_AVD_MANAGEMENT_NAME
   virtual_network_name        = module.NETWORKING.vnet_name
   subnet_name                 = module.NETWORKING.avd_subnet_name
-  host_vm_name                = var.host_vm_name
-  host_vm_size                = var.host_vm_size
-  admin_username              = var.admin_username
-  admin_password              = var.admin_password
   avd_workspace_name          = var.avd_workspace_name
   avd_workspace_description   = var.avd_workspace_description
   avd_hostpool_name           = var.avd_hostpool_name

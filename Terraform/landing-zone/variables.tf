@@ -19,6 +19,10 @@ variable "location" {
     type        = string
 }
 
+variable "tags" {
+    description = "The tags for the resources"
+    type        = map(string)  
+}
 
 ### Network Variables
 variable "vnet_name" {
@@ -74,51 +78,51 @@ variable "avd_subnet_address_prefix" {
     type        = string  
 }
 
-# Session Host VM Variables
-variable "host_vm_name" {
-    description = "The name of the session host VM"
-    type        = string  
-}
-
-variable "host_vm_size" {
-    description = "The size of the VM"
-    type        = string  
-}
-
-variable "host_vm_image_publisher" {
-    description = "The publisher of the VM image"
-    type        = string  
-}
-
-variable "host_vm_image_offer" {
-    description = "The offer of the VM image"
-    type        = string  
-}
-
-variable "host_vm_image_sku" {
-    description = "The SKU of the VM image"
-    type        = string  
-}
-
-variable "host_vm_image_version" {
-    description = "The version of the VM image"
-    type        = string  
-}
-
-variable "host_vm_managed_disk_type" {
-    description = "The type of the managed disk"
-    type        = string  
-}
-
-variable "admin_username" {
-    description = "The admin username of the VM"
-    type        = string  
-}
-
-variable "admin_password" {
-    description = "The admin password of the VM"
-    type        = string  
-}
+# # Session Host VM Variables
+# variable "host_vm_name" {
+#     description = "The name of the session host VM"
+#     type        = string  
+# }
+# 
+# variable "host_vm_size" {
+#     description = "The size of the VM"
+#     type        = string  
+# }
+# 
+# variable "host_vm_image_publisher" {
+#     description = "The publisher of the VM image"
+#     type        = string  
+# }
+# 
+# variable "host_vm_image_offer" {
+#     description = "The offer of the VM image"
+#     type        = string  
+# }
+# 
+# variable "host_vm_image_sku" {
+#     description = "The SKU of the VM image"
+#     type        = string  
+# }
+# 
+# variable "host_vm_image_version" {
+#     description = "The version of the VM image"
+#     type        = string  
+# }
+# 
+# variable "host_vm_managed_disk_type" {
+#     description = "The type of the managed disk"
+#     type        = string  
+# }
+# 
+# variable "admin_username" {
+#     description = "The admin username of the VM"
+#     type        = string  
+# }
+# 
+# variable "admin_password" {
+#     description = "The admin password of the VM"
+#     type        = string  
+# }
 
 
 ## Host Pool Variables

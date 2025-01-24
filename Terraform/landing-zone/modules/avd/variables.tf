@@ -23,23 +23,6 @@ variable "subnet_id" {
     type        = string  
 }
 
-variable "host_vm_size" {
-    description = "The size of the virtual machine."
-    type        = string
-    default     = "Standard_DS1_v2"
-}
-
-variable "admin_username" {
-    description = "The admin username for the virtual machines."
-    type        = string
-}
-
-variable "admin_password" {
-    description = "The admin password for the virtual machines."
-    type        = string
-    sensitive   = true
-}
-
 variable "tags" {
     description = "A map of tags to assign to the resources."
     type        = map(string)
@@ -78,10 +61,5 @@ variable "avd_app_group_name" {
 
 variable "avd_app_group_type" {
     description = "The type of the Azure Virtual Desktop application group."
-    type        = string
-}
-
-variable "host_vm_name" {
-    description = "The name of the host virtual machine."
     type        = string
 }
