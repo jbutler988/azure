@@ -1,0 +1,18 @@
+# Network Parameters
+network_rules: Allow
+dns: ["10.45.1.61", "10.45.1.62", "10.10.0.54", "10.10.0.53"]
+gateway_cidr: "10.45.0.0/24"
+dc_cidr: "10.45.1.0/24"
+azfw_cidr: "10.45.5.0/26"
+devops_cidr: "10.45.5.64/26"
+
+# VM Parameters
+devops_vm_count: 1
+vm_size1: "Standard_DS2_v2"
+
+# Governance Parameters
+mg_name: EPRI-PROD
+enforce_policy: false
+
+
+
