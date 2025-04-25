@@ -1,22 +1,37 @@
+<#
+.SYNOPSIS
+    This PowerShell script searches the source Azure subscription for all Entra role assignments and custom roles. It also reports all Key Vaults and their access policies, as well as all resources with known Entra directories (Azure AD tenants).
+
+.DESCRIPTION
+    This PowerShell script searches the source Azure subscription for all Entra role assignments and custom roles. It also reports all Key Vaults and their access policies, as well as all resources with known Entra directories (Azure AD tenants).
+
+.NOTES
+    Author: Jeremy Butler
+    Date: 2025-04-25
+    Version: 0.1
+#>
+
 # Specify the subscription ID
-$subscriptionId = "<Your-Subscription-ID>"
+$subscriptionId = "1dc888f8-76e4-4a68-9b19-750b42aa1acf"
 
 # Set the subscription context
 Set-AzContext -SubscriptionId $subscriptionId
 
 # Get all role assignments for the subscription
-$roleAssignments = Get-AzRoleAssignment -all -includeinherited -Scope "/subscriptions/$subscriptionId"
+$roleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$subscriptionId"
 
 # Define the output CSV file path
-$outputCsvPath = "roleAssignments.csv"
+$outputCsvPath = "keyvaultRoleAssignments.csv"
 
 # Export role assignments to CSV
 $roleAssignments | Select-Object `
+    RoleAssignmentName, `
     DisplayName, `
+    SignInName, `
+    ObjectType, `
     RoleDefinitionName, `
     PrincipalType, `
-    Scope, `
-    Id `
+    Scope `
     | Export-Csv -Path $outputCsvPath -NoTypeInformation -Encoding UTF8
 
 Write-Host "Role assignments exported to $outputCsvPath"
@@ -29,6 +44,11 @@ $customRoles = Get-AzRoleDefinition | Where-Object { $_.IsCustom -eq $true }
 # Define the output CSV file path for custom roles
 $customRolesCsvPath = "customRoles.csv"
 
+if ($null -eq $customRoles) {
+    Write-Host "No custom roles found in the subscription."
+}
+
+else {
 # Export custom roles to CSV
 $customRoles | Select-Object `
     Name, `
@@ -39,6 +59,7 @@ $customRoles | Select-Object `
     | Export-Csv -Path $customRolesCsvPath -NoTypeInformation -Encoding UTF8
 
 Write-Host "Custom roles exported to $customRolesCsvPath"
+}
 
 #############################################################################################################
 
@@ -48,6 +69,11 @@ $managedIdentityRoleAssignments = $roleAssignments | Where-Object { $_.Principal
 # Define the output CSV file path for managed identity role assignments
 $managedIdentityCsvPath = "managedIdentityRoleAssignments.csv"
 
+if ($null -eq $managedIdentityRoleAssignments) {
+    Write-Host "No managed identity role assignments found in the subscription."
+}
+
+else {
 # Export managed identity role assignments to CSV
 $managedIdentityRoleAssignments | Select-Object `
     DisplayName, `
@@ -58,53 +84,73 @@ $managedIdentityRoleAssignments | Select-Object `
     | Export-Csv -Path $managedIdentityCsvPath -NoTypeInformation -Encoding UTF8
 
 Write-Host "Managed identity role assignments exported to $managedIdentityCsvPath"
+}
 
 #############################################################################################################
 
 # Get all Key Vaults in the subscription
 $keyVaults = Get-AzKeyVault -SubscriptionId $subscriptionId
 
-# Define the output CSV file path for Key Vaults
-$keyVaultsCsvPath = "keyVaults.csv"
+if ($null -eq $keyVaults) {
+    Write-Host "No Key Vaults found in the subscription."
+} else {
+    # Define the output CSV file path for Key Vaults and their access policies
+    $keyVaultsCsvPath = "keyVaultsWithAccessPolicies.csv"
 
-# Export Key Vault details to CSV
-$keyVaults | Select-Object `
-    VaultName, `
-    ResourceGroupName, `
-    Location, `
-    Sku.Family, `
-    Sku.Name `
-    | Export-Csv -Path $keyVaultsCsvPath -NoTypeInformation -Encoding UTF8
+    # Combine Key Vault details with access policies or role assignments
+    $keyVaultsWithAccessPolicies = foreach ($vault in $keyVaults) {
+        if ($vault.AccessPolicies) {
+            # Traditional access policies
+            foreach ($policy in $vault.AccessPolicies) {
+                [PSCustomObject]@{
+                    VaultName               = $vault.VaultName
+                    ResourceGroupName       = $vault.ResourceGroupName
+                    Location                = $vault.Location
+                    SkuFamily               = $vault.Sku.Family
+                    SkuName                 = $vault.Sku.Name
+                    ObjectId                = $policy.ObjectId
+                    TenantId                = $policy.TenantId
+                    PermissionsToKeys       = $policy.PermissionsToKeys -join ","
+                    PermissionsToSecrets    = $policy.PermissionsToSecrets -join ","
+                    PermissionsToCertificates = $policy.PermissionsToCertificates -join ","
+                    PermissionsToStorage    = $policy.PermissionsToStorage -join ","
+                }
+            }
+        } else {
+            # Azure RBAC model: Get role assignments for the Key Vault
+            $roleAssignments = Get-AzRoleAssignment -Scope $vault.ResourceId
+            foreach ($role in $roleAssignments) {
+                [PSCustomObject]@{
+                    VaultName               = $vault.VaultName
+                    ResourceGroupName       = $vault.ResourceGroupName
+                    Location                = $vault.Location
+                    SkuFamily               = $vault.Sku.Family
+                    SkuName                 = $vault.Sku.Name
+                    ObjectId                = $role.PrincipalId
+                    TenantId                = $role.TenantId
+                    PermissionsToKeys       = "Managed by RBAC"
+                    PermissionsToSecrets    = "Managed by RBAC"
+                    PermissionsToCertificates = "Managed by RBAC"
+                    PermissionsToStorage    = "Managed by RBAC"
+                }
+            }
+        }
+    }
 
-Write-Host "Key Vaults exported to $keyVaultsCsvPath"
+    # Export combined Key Vault details and access policies to CSV
+    $keyVaultsWithAccessPolicies | Export-Csv -Path $keyVaultsCsvPath -NoTypeInformation -Encoding UTF8
 
-# Get Key Vault access policies
-$keyVaultAccessPolicies = foreach ($vault in $keyVaults) {
-    Get-AzKeyVaultAccessPolicy -VaultName $vault.VaultName | Select-Object `
-        VaultName, `
-        ObjectId, `
-        PermissionsToKeys, `
-        PermissionsToSecrets, `
-        PermissionsToCertificates, `
-        PermissionsToStorage
+    Write-Host "Key Vaults with access policies exported to $keyVaultsCsvPath"
 }
-
-# Define the output CSV file path for Key Vault access policies
-$keyVaultAccessPoliciesCsvPath = "keyVaultAccessPolicies.csv"
-
-# Export Key Vault access policies to CSV
-$keyVaultAccessPolicies | Export-Csv -Path $keyVaultAccessPoliciesCsvPath -NoTypeInformation -Encoding UTF8
-
-Write-Host "Key Vault access policies exported to $keyVaultAccessPoliciesCsvPath"
 
 #############################################################################################################
 
 # Get all resources in the subscription
-$resources = Get-AzResource -SubscriptionId $subscriptionId
+$resources = Get-AzResource
 
 # Filter resources with known Entra directories (Azure AD tenants)
 $resourcesWithEntraDirectories = foreach ($resource in $resources) {
-    if ($resource.ManagedByTenantId -ne $null) {
+    if ( $null -ne $resource.ManagedByTenantId ) {
         [PSCustomObject]@{
             ResourceName       = $resource.Name
             ResourceType       = $resource.Type
@@ -115,6 +161,11 @@ $resourcesWithEntraDirectories = foreach ($resource in $resources) {
     }
 }
 
+if ($null -eq $resourcesWithEntraDirectories) {
+    Write-Host "No resources with known Entra directories found in the subscription."
+}
+
+else {
 # Define the output CSV file path for resources with known Entra directories
 $resourcesWithEntraDirectoriesCsvPath = "resourcesWithEntraDirectories.csv"
 
@@ -122,3 +173,4 @@ $resourcesWithEntraDirectoriesCsvPath = "resourcesWithEntraDirectories.csv"
 $resourcesWithEntraDirectories | Export-Csv -Path $resourcesWithEntraDirectoriesCsvPath -NoTypeInformation -Encoding UTF8
 
 Write-Host "Resources with known Entra directories exported to $resourcesWithEntraDirectoriesCsvPath"
+}
