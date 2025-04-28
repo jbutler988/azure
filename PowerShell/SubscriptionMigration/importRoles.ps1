@@ -1,5 +1,6 @@
 # Define the path to the JSON file
-$jsonFilePath = "roles.json"
+$jsonFilePath = "RoleAssignmentsExport.json"
+$subscriptionId = "<Your-Subscription-ID>"
 
 # Load the JSON file
 if (-Not (Test-Path -Path $jsonFilePath)) {
@@ -10,7 +11,6 @@ if (-Not (Test-Path -Path $jsonFilePath)) {
 $rolesData = Get-Content -Path $jsonFilePath | ConvertFrom-Json
 
 # Set the subscription ID
-$subscriptionId = "<Your-Subscription-ID>"
 Set-AzContext -SubscriptionId $subscriptionId
 
 # Iterate through the roles in the JSON file and assign them
@@ -24,5 +24,3 @@ foreach ($role in $rolesData) {
     New-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName $roleDefinitionName -Scope $scope -ErrorAction Stop
     Write-Host "Role assignment successful."
 }
-
-Write-Host "All role assignments completed successfully."

@@ -3,7 +3,7 @@
 # the role assignments into a new subscription after migration.
 
 # Define variables
-$subscriptionId = "<Your-Source-Subscription-ID>"
+$subscriptionId = "e6f064c5-ca13-4772-8729-d11921b1b800"
 $outputFile = "RoleAssignmentsExport.json"
 
 # Set the subscription context
