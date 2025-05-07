@@ -75,3 +75,7 @@ $resourceDetails | Export-Csv -Path $exportFilePath -NoTypeInformation
 
 Write-Output "Analysis complete. Please check the output above for resource readiness details."
 Write-Output "Exported resource list to $exportFilePath"
+
+
+
+{"stack":"TypeError: Cannot read properties of undefined (reading 'id')\n at ss (https://afd-v2.hosting.portal.azure.net/network/Content/Dynamic/uw5Vwwkc5Ovl.js:2:73829)\n at https://afd-v2.hosting.portal.azure.net/network/Content/Dynamic/uw5Vwwkc5Ovl.js:2:78559\n at async ts (https://afd-v2.hosting.portal.azure.net/network/Content/Dynamic/uw5Vwwkc5Ovl.js:2:78170)\n at async https://afd-v2.hosting.portal.azure.net/network/Content/Dynamic/uw5Vwwkc5Ovl.js:2:80772","message":"Cannot read properties of undefined (reading 'id')"}
