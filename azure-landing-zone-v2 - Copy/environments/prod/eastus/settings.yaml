@@ -1,0 +1,41 @@
+# Network Parameters
+network_rules: Deny
+paas_public: false
+dns: ["10.200.249.4","10.200.249.20"]
+allow_gw_transit: false
+spoke1_vnet_id:
+
+
+# Hub VNET
+hub_cidr: "10.20.252.0/22"
+gateway_cidr: "10.20.252.0/26"
+azfw_cidr: "10.20.252.64/26"
+bastion_cidr: "10.20.252.128/26"
+
+# Management VNET
+mgmt_cidr: "10.200.248.0/22"
+devops_cidr: "10.200.248.0/26"
+pe_cidr: "10.200.248.64/26"
+shared_cidr: "10.200.248.128/26"
+dns01_cidr: "10.200.249.0/28"
+dns02_cidr: "10.200.249.16/28"
+dns03_cidr: "10.200.249.32/28"
+dns04_cidr: "10.200.249.48/28"
+
+
+# On-Prem Network Address Spaces
+onprem01: "10.0.0.0/8"
+onprem02: "172.16.0.0/12"
+vpn_prefix: ["10.0.0.0/8"]
+
+# VM Parameters
+vm_count: 1
+devops_vm_count: 1
+vm_size1: "Standard_B2ms"
+vm_size2: "Standard_DS2_v2"
+
+# Governance Parameters
+enforce_policy: false
+costcenter_tag: 7941
+owner_tag: "Bode"
+team_tag: Azure_Architects
