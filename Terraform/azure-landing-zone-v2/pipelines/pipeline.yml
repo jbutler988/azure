@@ -1,0 +1,163 @@
+parameters:
+- name: region
+  displayName: Region
+  type: string
+  default: eastus
+  values:
+  - eastus
+  - centralus
+
+- name: reg
+  type: object
+  default:
+    eastus:
+      name: eus
+    centralus: 
+      name: cus
+
+- name: environment
+  displayName: Environment
+  type: string
+  default: Prod
+  values:
+  - Dev
+  - Prod
+
+- name: org
+  displayName: Organization
+  type: string
+  default: shi
+  values:
+  - shi
+
+- name: svc
+  displayName: Service
+  type: string
+  default: hub
+  values:
+  - hub
+
+- name: env
+  type: object
+  default:
+    Dev:
+      name: dev
+      subscription: e0bb7e5f-1bc2-4525-8719-d80996c04508
+      service_connection: "NA"
+      devops_org: shi-dev
+
+    Prod:
+      name: prod
+      subscription: e0bb7e5f-1bc2-4525-8719-d80996c04508
+      service_connection: "SVC-SPN-MG-SHI-LANDING-ZONE-TEST"
+      devops_org: shi-dev
+
+
+variables:
+ - group: 'devops-${{ parameters.reg[parameters.region].name }}-${{ parameters.env[parameters.environment].name }}'
+ - name: TENANT_ID
+   value: b5ba37f2-6484-4db8-b3f0-b8f0f15b785b
+ - name: WORKSPACE
+   value: '${{ parameters.org }}-${{ parameters.reg[parameters.region].name }}-${{ parameters.env[parameters.environment].name }}'
+ - name: STATE_RG
+   value: '${{ parameters.org }}-state-${{ parameters.reg[parameters.region].name }}-${{ parameters.env[parameters.environment].name }}-rg'
+ - name: STATE_SA
+   value: '${{ parameters.org }}state${{ parameters.reg[parameters.region].name}}${{ parameters.env[parameters.environment].name }}'
+ - name: SERVICE_CONNECTION_NAME
+   value: ${{ parameters.env[parameters.environment].service_connection }}
+ - name: ARTIFACT_DIRECTORY
+   value: $(Build.ArtifactStagingDirectory)
+ - name: TF_VAR_SUB
+   value: ${{ parameters.env[parameters.environment].subscription }}
+ - name: TF_VAR_REGION
+   value: ${{ parameters.region }}
+ - name: TF_VAR_REGION_ABR
+   value: ${{ parameters.reg[parameters.region].name }}
+ - name: TF_VAR_ENV
+   value: ${{ parameters.env[parameters.environment].name }}
+ - name: TF_VAR_ORG
+   value: ${{ parameters.org }}
+ - name: TF_VAR_SVC
+   value: ${{ parameters.svc }}
+ - name: TF_VAR_DEVOPS_ORG
+   value: ${{ parameters.env[parameters.environment].devops_org }}
+
+pool: $(TF_VAR_AGENT_POOL)
+  #vmImage: 'ubuntu-20.04'
+
+stages:
+- stage: Create_Terraform_Prerequisites
+  jobs:
+  - deployment: create_prerequisites
+    displayName: Create Terraform Prerequisites
+    environment: terraform_prerequisites
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: "Pre-Reqs"
+              inputs:
+                azureSubscription: $(SERVICE_CONNECTION_NAME)
+                addSpnToEnvironment: true
+                scriptType: bash
+                workingDirectory: '$(System.DefaultWorkingDirectory)/'
+                arguments: ${{ parameters.region }}
+                scriptPath: scripts/01-create-prerequisites.sh
+          
+- stage: Terraform_Plan
+  jobs:
+  - deployment: terraform_plan
+    displayName: Terraform Plan
+    environment: terraform_plan
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: "Plan"
+              inputs:
+                azureSubscription: $(SERVICE_CONNECTION_NAME)
+                addSpnToEnvironment: true
+                scriptType: bash
+                workingDirectory: '$(System.DefaultWorkingDirectory)/'
+                arguments: $(TF_VAR_PAT) $(TF_VAR_VPN_PSK)
+                scriptPath: scripts/02-terraform-plan.sh
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Terraform Plan to Artifacts
+              inputs:
+                PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                ArtifactName: 'plan'
+                publishLocation: 'Container'
+
+
+
+- stage: Terraform_Apply
+  jobs:
+  - deployment: terraform_apply
+    displayName: Terraform Apply
+    environment: terraform_apply
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: DownloadBuildArtifacts@0
+              displayName: Download Terraform Plan from Artifacts
+              inputs:
+                buildType: current
+                downloadType: single
+                artifactName: 'plan'
+                downloadPath: '$(System.ArtifactsDirectory)'
+            - task: AzureCLI@2
+              displayName: "Apply"
+              inputs:
+                azureSubscription: $(SERVICE_CONNECTION_NAME)
+                addSpnToEnvironment: true
+                scriptType: bash
+                workingDirectory: '$(System.DefaultWorkingDirectory)/'
+                arguments: ${{ parameters.env[parameters.environment].name }} ${{ parameters.reg[parameters.region].name }}
+                scriptPath: scripts/03-terraform-apply.sh
