@@ -48,3 +48,52 @@ $resourceDetails | Export-Csv -Path $exportFilePath -NoTypeInformation
 Write-Output "Analysis complete. Please check the output above for resource readiness details."
 Write-Output "Exported resource list to $exportFilePath"
 }
+
+
+# Get all subnets in all virtual networks
+$subnetDetails = @()
+
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $vnets = Get-AzVirtualNetwork
+    foreach ($vnet in $vnets) {
+        foreach ($subnet in $vnet.Subnets) {
+            $subnetDetails += [PSCustomObject]@{
+                VNetName         = $vnet.Name
+                SubnetName       = $subnet.Name
+                AddressPrefix    = ($subnet.AddressPrefix -join ", ")
+                ResourceGroup    = $vnet.ResourceGroupName
+                Location         = $vnet.Location
+                SubscriptionName = $subscription.Name
+                SubscriptionId   = $subscription.Id
+            }
+        }
+    }
+}
+
+$subnetExportPath = Join-Path -Path (Get-Location) -ChildPath "CspSubnets.csv"
+$subnetDetails | Export-Csv -Path $subnetExportPath -NoTypeInformation
+Write-Output "Exported subnet list to $subnetExportPath"
+
+
+# Get all key vaults in all subscriptions
+$keyVaultDetails = @()
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $keyVaults = Get-AzKeyVault
+    foreach ($keyVault in $keyVaults) {
+        $keyVaultDetails += [PSCustomObject]@{
+            KeyVaultName     = $keyVault.VaultName
+            ResourceGroup    = $keyVault.ResourceGroupName
+            Location         = $keyVault.Location
+            SubscriptionName = $subscription.Name
+            SubscriptionId   = $subscription.Id
+        }
+    }
+}
+
+$keyVaultExportPath = Join-Path -Path (Get-Location) -ChildPath "CspKeyVaults.csv"
+$keyVaultDetails | Export-Csv -Path $keyVaultExportPath -NoTypeInformation
+Write-Output "Exported key vault list to $keyVaultExportPath"

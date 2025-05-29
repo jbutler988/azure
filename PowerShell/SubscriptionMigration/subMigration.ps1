@@ -11,13 +11,9 @@
     - Review Azure documentation for any limitations or prerequisites: https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-subscriptions-associated-directory
 #>
 
-param (
-    [Parameter(Mandatory = $true)]
-    [string]$SubscriptionId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$TargetTenantId
-)
+## Parameters
+$subscriptionId = ""
+$TargetTenantId = ""
 
 # Set the context to the subscription
 Write-Host "Setting context to subscription $SubscriptionId..." -ForegroundColor Cyan
@@ -30,6 +26,24 @@ Write-Host "Current Tenant: $currentTenant" -ForegroundColor Yellow
 if ($currentTenant -eq $TargetTenantId) {
     Write-Host "The subscription is already in the target tenant." -ForegroundColor Green
     exit 0
+}
+
+# Check Access
+Write-Host "Checking access to the subscription..." -ForegroundColor Cyan
+# Get the current user's object ID
+$currentUser = Get-AzADUser -SignedIn
+
+# Get the role assignments for the subscription
+$roleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$SubscriptionId" -ObjectId $currentUser.Id
+
+# Check if the user is an Owner
+$isOwner = $roleAssignments | Where-Object { $_.RoleDefinitionName -eq "Owner" }
+
+if (-not $isOwner) {
+    Write-Error "Current user does not have Owner permissions on the subscription. Please ensure you have the required access."
+    exit 1
+} else {
+    Write-Host "Current user is an Owner on the subscription." -ForegroundColor Green
 }
 
 # Start migration
