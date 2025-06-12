@@ -1,19 +1,23 @@
 <#
 .SYNOPSIS
-    This PowerShell script queries all Azure subscriptions available to the logged in user and produces a .csv file output with all Azure resources.
+    This PowerShell script queries all Azure subscriptions available to the logged in user and produces a .csv file output with all Azure resources. Additionally, it retrieves all subnets in all virtual networks, all key vaults across the subscriptions and all private endpoints.
 
 .DESCRIPTION
-    This script is designed to query all available subscriptions within an Azure tenant for resources currently.
-    The script will output a .csv file with the following columns: Name, Resource Group, Location, Resource Type, SubscriptionName, and Subscription.
+    This PowerShell script queries all Azure subscriptions available to the logged in user and produces a .csv file output with all Azure resources. Additionally, it retrieves all subnets in all virtual networks, all key vaults across the subscriptions and all private endpoints.
+    Each subsection creates a separate CSV file in the current directory, detailing the resources, subnets, key vaults, and private endpoints. Follow on management of the output .csv files is required to present a comprehensive view of the Azure environment.
 
 .NOTES
     Author: Jeremy Butler
-    Date: 2021-09-27
-    Version: 0.1
+    Date: 2025-06-12
+    Version: 0.5
 #>
 
 # Get a list of subscriptions and prompt user to select one
 $subscriptions = Get-AzSubscription
+
+###########################################
+## Complete Resource Analysis            ##
+###########################################
 
 # Initialize an array to hold the resource details with readiness status
 $resourceDetails = @()
@@ -50,7 +54,10 @@ Write-Output "Exported resource list to $exportFilePath"
 }
 
 
-# Get all subnets in all virtual networks
+###########################################
+## Network and Subnet Analysis           ##
+###########################################
+
 $subnetDetails = @()
 
 foreach ($subscription in $subscriptions) {
@@ -77,7 +84,10 @@ $subnetDetails | Export-Csv -Path $subnetExportPath -NoTypeInformation
 Write-Output "Exported subnet list to $subnetExportPath"
 
 
-# Get all key vaults in all subscriptions
+###########################################
+## Key Vault Analysis                    ##
+###########################################
+
 $keyVaultDetails = @()
 foreach ($subscription in $subscriptions) {
     Set-AzContext -SubscriptionId $subscription.Id
@@ -97,3 +107,29 @@ foreach ($subscription in $subscriptions) {
 $keyVaultExportPath = Join-Path -Path (Get-Location) -ChildPath "CspKeyVaults.csv"
 $keyVaultDetails | Export-Csv -Path $keyVaultExportPath -NoTypeInformation
 Write-Output "Exported key vault list to $keyVaultExportPath"
+
+
+###########################################
+## Private Endpoint Analysis             ##
+###########################################
+
+$privateEndpointDetails = @()
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $privateEndpoints = Get-AzPrivateEndpoint
+    foreach ($pe in $privateEndpoints) {
+        $privateEndpointDetails += [PSCustomObject]@{
+            PrivateEndpointName = $pe.Name
+            ResourceGroup       = $pe.ResourceGroupName
+            Location            = $pe.Location
+            SubnetId            = $pe.Subnet.Id
+            SubscriptionName    = $subscription.Name
+            SubscriptionId      = $subscription.Id
+        }
+    }
+}
+
+$privateEndpointExportPath = Join-Path -Path (Get-Location) -ChildPath "CspPrivateEndpoints.csv"
+$privateEndpointDetails | Export-Csv -Path $privateEndpointExportPath -NoTypeInformation
+Write-Output "Exported private endpoint list to $privateEndpointExportPath"
