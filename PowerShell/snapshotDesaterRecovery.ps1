@@ -43,5 +43,5 @@ New-AzSnapshot `
     -SnapshotName $targetSnapshotName `
     -ResourceGroupName $resourceGroupName
 
-
+## The following will allow you to monitor the progress of the snapshot copy operation
 (Get-AzSnapshot -ResourceGroupName $resourceGroupName -SnapshotName $targetSnapshotName).CompletionPercent
