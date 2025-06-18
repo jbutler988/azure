@@ -47,7 +47,7 @@ foreach ($resource in $resources) {
 
 
 # Export resource details to a CSV file in the current directory
-$exportFilePath = Join-Path -Path (Get-Location) -ChildPath "CspResources.csv"
+$exportFilePath = Join-Path -Path (Get-Location) -ChildPath "Resources.csv"
 $resourceDetails | Export-Csv -Path $exportFilePath -NoTypeInformation
 Write-Output "Analysis complete. Please check the output above for resource readiness details."
 Write-Output "Exported resource list to $exportFilePath"
@@ -79,9 +79,39 @@ foreach ($subscription in $subscriptions) {
     }
 }
 
-$subnetExportPath = Join-Path -Path (Get-Location) -ChildPath "CspSubnets.csv"
+$subnetExportPath = Join-Path -Path (Get-Location) -ChildPath "Subnets.csv"
 $subnetDetails | Export-Csv -Path $subnetExportPath -NoTypeInformation
 Write-Output "Exported subnet list to $subnetExportPath"
+
+
+###########################################
+## Public IP  Analysis                   ##
+###########################################
+
+$publicIpDetails = @()
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $publicIps = Get-AzPublicIpAddress
+    foreach ($publicIp in $publicIps) {
+        $publicIpDetails += [PSCustomObject]@{
+            PublicIpName      = $publicIp.Name
+            ResourceGroup     = $publicIp.ResourceGroupName
+            Location          = $publicIp.Location
+            IpAddress         = $publicIp.IpAddress
+            AllocationMethod  = $publicIp.PublicIpAllocationMethod
+            Sku               = $publicIp.Sku.Name
+            IpVersion         = $publicIp.PublicIpAddressVersion
+            DnsName           = $publicIp.DnsSettings.Fqdn
+            SubscriptionName  = $subscription.Name
+            SubscriptionId    = $subscription.Id
+        }
+    }
+}
+
+$publicIpExportPath = Join-Path -Path (Get-Location) -ChildPath "CspPublicIps.csv"
+$publicIpDetails | Export-Csv -Path $publicIpExportPath -NoTypeInformation
+Write-Output "Exported public IP list to $publicIpExportPath"
 
 
 ###########################################
@@ -104,7 +134,7 @@ foreach ($subscription in $subscriptions) {
     }
 }
 
-$keyVaultExportPath = Join-Path -Path (Get-Location) -ChildPath "CspKeyVaults.csv"
+$keyVaultExportPath = Join-Path -Path (Get-Location) -ChildPath "KeyVaults.csv"
 $keyVaultDetails | Export-Csv -Path $keyVaultExportPath -NoTypeInformation
 Write-Output "Exported key vault list to $keyVaultExportPath"
 
@@ -130,6 +160,31 @@ foreach ($subscription in $subscriptions) {
     }
 }
 
-$privateEndpointExportPath = Join-Path -Path (Get-Location) -ChildPath "CspPrivateEndpoints.csv"
+$privateEndpointExportPath = Join-Path -Path (Get-Location) -ChildPath "PrivateEndpoints.csv"
 $privateEndpointDetails | Export-Csv -Path $privateEndpointExportPath -NoTypeInformation
 Write-Output "Exported private endpoint list to $privateEndpointExportPath"
+
+
+###########################################
+## Virtual Machine State Analysis        ##
+###########################################
+
+$vmStateDetails = @()
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $vms = Get-AzVM
+    foreach ($vm in $vms) {
+        $vmStatus = (Get-AzVM -ResourceGroupName $vm.ResourceGroupName -Name $vm.Name -Status).Statuses | Where-Object { $_.Code -like 'PowerState/*' } | Select-Object -ExpandProperty DisplayStatus
+        $vmStateDetails += [PSCustomObject]@{
+            VMName           = $vm.Name
+            ResourceGroup    = $vm.ResourceGroupName
+            Location         = $vm.Location
+            PowerState       = $vmStatus
+            SubscriptionName = $subscription.Name
+            SubscriptionId   = $subscription.Id
+        }
+    }
+}
+
+$vmStateDetails | Format-Table -AutoSize
