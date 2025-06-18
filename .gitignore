@@ -28,3 +28,6 @@ LICENSE.txt
 # Ignore backup of tfstate files
 *.tfstate.backup
 *.terraform.*
+
+#Ignore all .csv files
+*.csv
