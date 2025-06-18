@@ -1,6 +1,4 @@
 
-
-
 resource "azurerm_monitor_action_group" "main" {
   name                = "Azure_Admins_Email"
   resource_group_name = azurerm_log_analytics_workspace.la.resource_group_name

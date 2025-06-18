@@ -8,7 +8,6 @@ AGENT_POOL=${AGENT_POOL}
 export AGENT_ALLOW_RUNASROOT=1
 
 
-
 # Select a default agent version if one is not specified
 if [ -z "$ADO_AGENT_VERSION" ]; then
   ADO_AGENT_VERSION=2.200.2

@@ -2,18 +2,21 @@ parameters:
 - name: region
   displayName: Region
   type: string
-  default: eastus
+  default: westus
   values:
-  - eastus
-  - centralus
+  - westus
+  - westus3
+  - eastus2
 
 - name: reg
   type: object
   default:
-    eastus:
-      name: eus
-    centralus: 
-      name: cus
+    westus:
+      name: wus
+    westus3: 
+      name: wus3
+    eastus2:
+      name: eus2
 
 - name: environment
   displayName: Environment
@@ -26,9 +29,9 @@ parameters:
 - name: org
   displayName: Organization
   type: string
-  default: shi
+  default: keelson
   values:
-  - shi
+  - keelson
 
 - name: svc
   displayName: Service
@@ -42,21 +45,27 @@ parameters:
   default:
     Dev:
       name: dev
-      subscription: e0bb7e5f-1bc2-4525-8719-d80996c04508
+      subscription: 
       service_connection: "NA"
-      devops_org: shi-dev
+      devops_org: keelson-dev
 
     Prod:
       name: prod
-      subscription: e0bb7e5f-1bc2-4525-8719-d80996c04508
-      service_connection: "SVC-SPN-MG-SHI-LANDING-ZONE-TEST"
-      devops_org: shi-dev
+      subscription: 
+      service_connection: "svc-terraform-prod"
+      devops_org: keelson-prod
+
+- tenant_id:
+    type: string
+    default: '5c5d9475-a6f3-470d-a06f-67306a38649d'
+    values:
+    - '5c5d9475-a6f3-470d-a06f-67306a38649d'
 
 
 variables:
  - group: 'devops-${{ parameters.reg[parameters.region].name }}-${{ parameters.env[parameters.environment].name }}'
  - name: TENANT_ID
-   value: b5ba37f2-6484-4db8-b3f0-b8f0f15b785b
+   value: '${{ parameters.tenant_id }}'
  - name: WORKSPACE
    value: '${{ parameters.org }}-${{ parameters.reg[parameters.region].name }}-${{ parameters.env[parameters.environment].name }}'
  - name: STATE_RG

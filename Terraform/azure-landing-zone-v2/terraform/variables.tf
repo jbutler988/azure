@@ -51,12 +51,3 @@ variable "VPN_PSK"{
     type = string
     default = "updatepsk"
 }
-
-
-
-
-
-
-
-
-

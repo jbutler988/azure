@@ -19,9 +19,3 @@ provider "azurerm" {
   features {}
   skip_provider_registration = false
 }
-
-# provider "azurerm" {
-#   alias = "example"
-#   subscription_id = local.settings.second_subscription_id
-#   features {}
-# }

@@ -9,7 +9,6 @@ az login --service-principal -u $servicePrincipalId -p $servicePrincipalKey --te
 az account set --subscription $TF_VAR_SUB
 
 
-
 # CHECK / CREATE THE RESOURCE GROUP
 
 if [ $(az group exists --name $STATE_RG) = false ]; then

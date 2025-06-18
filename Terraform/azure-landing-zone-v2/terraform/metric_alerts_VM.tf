@@ -1,9 +1,4 @@
 
-
-# Virtuam Machine Metric documentation
-# https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-compute-virtualmachines-metrics
-
-
 resource "azurerm_monitor_metric_alert" "vm_metrics" {
   name                     = ("CPU-VM-WARNING-ALERT")
   resource_group_name      = azurerm_log_analytics_workspace.la.resource_group_name

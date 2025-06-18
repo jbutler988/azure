@@ -22,7 +22,6 @@ resource "azurerm_key_vault" "key-vault" {
   }
 }
 
-
 resource "azurerm_private_endpoint" "keyvault_endpoint" {
   depends_on          = [ azurerm_private_dns_zone.private_dns_zone]
   name                = "pe-${azurerm_key_vault.key-vault.name}"
@@ -59,4 +58,3 @@ resource "azurerm_key_vault_secret" "pat" {
   value        = var.PAT
   key_vault_id = azurerm_key_vault.key-vault.id
 }
-
