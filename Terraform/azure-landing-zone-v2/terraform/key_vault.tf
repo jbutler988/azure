@@ -1,5 +1,4 @@
 
-
 resource "azurerm_key_vault" "key-vault" {
   name                        = ("kv-${var.ORG}-${var.SVC}-${var.REGION_ABR}-${var.ENV}")
   location                    = var.REGION

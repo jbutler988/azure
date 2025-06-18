@@ -32,7 +32,8 @@ resource "azurerm_private_dns_zone_virtual_network_link" "file_link" {
 # All commercial privatelink zones as of January 22, 2024
 
 locals {
-  private_dns_zones = toset([
+  private_dns_zones = toset(
+    [
     #############################
     # ** AI + Machine Learning **
     "privatelink.api.azureml.ms",
@@ -137,7 +138,6 @@ locals {
     "privatelink.service.signalr.net",
     "privatelink.azurestaticapps.net",
     "privatelink.servicebus.windows.net",
-
-    ])
+    ]
+  )
 }
-
