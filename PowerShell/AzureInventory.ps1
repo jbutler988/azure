@@ -85,6 +85,36 @@ Write-Output "Exported subnet list to $subnetExportPath"
 
 
 ###########################################
+## Public IP  Analysis                   ##
+###########################################
+
+$publicIpDetails = @()
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $publicIps = Get-AzPublicIpAddress
+    foreach ($publicIp in $publicIps) {
+        $publicIpDetails += [PSCustomObject]@{
+            PublicIpName      = $publicIp.Name
+            ResourceGroup     = $publicIp.ResourceGroupName
+            Location          = $publicIp.Location
+            IpAddress         = $publicIp.IpAddress
+            AllocationMethod  = $publicIp.PublicIpAllocationMethod
+            Sku               = $publicIp.Sku.Name
+            IpVersion         = $publicIp.PublicIpAddressVersion
+            DnsName           = $publicIp.DnsSettings.Fqdn
+            SubscriptionName  = $subscription.Name
+            SubscriptionId    = $subscription.Id
+        }
+    }
+}
+
+$publicIpExportPath = Join-Path -Path (Get-Location) -ChildPath "CspPublicIps.csv"
+$publicIpDetails | Export-Csv -Path $publicIpExportPath -NoTypeInformation
+Write-Output "Exported public IP list to $publicIpExportPath"
+
+
+###########################################
 ## Key Vault Analysis                    ##
 ###########################################
 
@@ -134,45 +164,27 @@ $privateEndpointExportPath = Join-Path -Path (Get-Location) -ChildPath "PrivateE
 $privateEndpointDetails | Export-Csv -Path $privateEndpointExportPath -NoTypeInformation
 Write-Output "Exported private endpoint list to $privateEndpointExportPath"
 
+
 ###########################################
-## Virtual Machine and Data Disk Analysis ##
+## Virtual Machine State Analysis        ##
 ###########################################
 
-$vmDetails = @()
+$vmStateDetails = @()
 foreach ($subscription in $subscriptions) {
     Set-AzContext -SubscriptionId $subscription.Id
 
     $vms = Get-AzVM
     foreach ($vm in $vms) {
-        $dataDisks = $vm.StorageProfile.DataDisks
-        if ($dataDisks.Count -eq 0) {
-            $vmDetails += [PSCustomObject]@{
-                VMName           = $vm.Name
-                ResourceGroup    = $vm.ResourceGroupName
-                Location         = $vm.Location
-                SubscriptionName = $subscription.Name
-                SubscriptionId   = $subscription.Id
-                DataDiskName     = ""
-                DataDiskSizeGB   = ""
-                DataDiskLun      = ""
-            }
-        } else {
-            foreach ($disk in $dataDisks) {
-                $vmDetails += [PSCustomObject]@{
-                    VMName           = $vm.Name
-                    ResourceGroup    = $vm.ResourceGroupName
-                    Location         = $vm.Location
-                    SubscriptionName = $subscription.Name
-                    SubscriptionId   = $subscription.Id
-                    DataDiskName     = $disk.Name
-                    DataDiskSizeGB   = $disk.DiskSizeGB
-                    DataDiskLun      = $disk.Lun
-                }
-            }
+        $vmStatus = (Get-AzVM -ResourceGroupName $vm.ResourceGroupName -Name $vm.Name -Status).Statuses | Where-Object { $_.Code -like 'PowerState/*' } | Select-Object -ExpandProperty DisplayStatus
+        $vmStateDetails += [PSCustomObject]@{
+            VMName           = $vm.Name
+            ResourceGroup    = $vm.ResourceGroupName
+            Location         = $vm.Location
+            PowerState       = $vmStatus
+            SubscriptionName = $subscription.Name
+            SubscriptionId   = $subscription.Id
         }
     }
 }
 
-$vmExportPath = Join-Path -Path (Get-Location) -ChildPath "VMsAndDataDisks.csv"
-$vmDetails | Export-Csv -Path $vmExportPath -NoTypeInformation
-Write-Output "Exported VM and data disk list to $vmExportPath"
+$vmStateDetails | Format-Table -AutoSize
