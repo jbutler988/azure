@@ -47,7 +47,7 @@ foreach ($resource in $resources) {
 
 
 # Export resource details to a CSV file in the current directory
-$exportFilePath = Join-Path -Path (Get-Location) -ChildPath "CspResources.csv"
+$exportFilePath = Join-Path -Path (Get-Location) -ChildPath "Resources.csv"
 $resourceDetails | Export-Csv -Path $exportFilePath -NoTypeInformation
 Write-Output "Analysis complete. Please check the output above for resource readiness details."
 Write-Output "Exported resource list to $exportFilePath"
@@ -79,7 +79,7 @@ foreach ($subscription in $subscriptions) {
     }
 }
 
-$subnetExportPath = Join-Path -Path (Get-Location) -ChildPath "CspSubnets.csv"
+$subnetExportPath = Join-Path -Path (Get-Location) -ChildPath "Subnets.csv"
 $subnetDetails | Export-Csv -Path $subnetExportPath -NoTypeInformation
 Write-Output "Exported subnet list to $subnetExportPath"
 
@@ -104,7 +104,7 @@ foreach ($subscription in $subscriptions) {
     }
 }
 
-$keyVaultExportPath = Join-Path -Path (Get-Location) -ChildPath "CspKeyVaults.csv"
+$keyVaultExportPath = Join-Path -Path (Get-Location) -ChildPath "KeyVaults.csv"
 $keyVaultDetails | Export-Csv -Path $keyVaultExportPath -NoTypeInformation
 Write-Output "Exported key vault list to $keyVaultExportPath"
 
@@ -130,6 +130,49 @@ foreach ($subscription in $subscriptions) {
     }
 }
 
-$privateEndpointExportPath = Join-Path -Path (Get-Location) -ChildPath "CspPrivateEndpoints.csv"
+$privateEndpointExportPath = Join-Path -Path (Get-Location) -ChildPath "PrivateEndpoints.csv"
 $privateEndpointDetails | Export-Csv -Path $privateEndpointExportPath -NoTypeInformation
 Write-Output "Exported private endpoint list to $privateEndpointExportPath"
+
+###########################################
+## Virtual Machine and Data Disk Analysis ##
+###########################################
+
+$vmDetails = @()
+foreach ($subscription in $subscriptions) {
+    Set-AzContext -SubscriptionId $subscription.Id
+
+    $vms = Get-AzVM
+    foreach ($vm in $vms) {
+        $dataDisks = $vm.StorageProfile.DataDisks
+        if ($dataDisks.Count -eq 0) {
+            $vmDetails += [PSCustomObject]@{
+                VMName           = $vm.Name
+                ResourceGroup    = $vm.ResourceGroupName
+                Location         = $vm.Location
+                SubscriptionName = $subscription.Name
+                SubscriptionId   = $subscription.Id
+                DataDiskName     = ""
+                DataDiskSizeGB   = ""
+                DataDiskLun      = ""
+            }
+        } else {
+            foreach ($disk in $dataDisks) {
+                $vmDetails += [PSCustomObject]@{
+                    VMName           = $vm.Name
+                    ResourceGroup    = $vm.ResourceGroupName
+                    Location         = $vm.Location
+                    SubscriptionName = $subscription.Name
+                    SubscriptionId   = $subscription.Id
+                    DataDiskName     = $disk.Name
+                    DataDiskSizeGB   = $disk.DiskSizeGB
+                    DataDiskLun      = $disk.Lun
+                }
+            }
+        }
+    }
+}
+
+$vmExportPath = Join-Path -Path (Get-Location) -ChildPath "VMsAndDataDisks.csv"
+$vmDetails | Export-Csv -Path $vmExportPath -NoTypeInformation
+Write-Output "Exported VM and data disk list to $vmExportPath"
