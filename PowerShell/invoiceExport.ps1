@@ -1,4 +1,16 @@
-# invoiceExport.ps1
+<#
+.SYNOPSIS
+    This PowerShell script creates a .csv file with invoicing information for all available subscriptions to the user.
+
+.DESCRIPTION
+    This PowerShell script creates a .csv file with invoicing information for all available subscriptions to the user.
+
+.NOTES
+    Author: Jeremy Butler
+    Date: 2025-06-20
+    Version: 0.1
+#>
+
 # Collects billing invoices for all Azure subscriptions and exports them as CSV files.
 
 # Get all subscriptions
