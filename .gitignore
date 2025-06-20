@@ -31,3 +31,6 @@ LICENSE.txt
 
 #Ignore all .csv files
 *.csv
+
+# Ignore invoices directory and all its contents
+invoices/
