@@ -62,12 +62,11 @@ foreach ($sub in $subscriptions) {
     $invoices = Get-AzInvoice -BillingAccountName $billingAccount.Name -BillingProfileName $billingProfile.Name
 
     if ($invoices) {
-        # Sanitize subscription name for file path
+        # Sanitize subscription name and ID for file path
         $sanitizedSubName = ($sub.Name -replace '[\\\/:\*\?"<>\|]', '_')
-        $csvPath = Join-Path $exportDir "$sanitizedSubName_$($sub.Id)_Invoices.csv"
+        $csvPath = Join-Path $exportDir "$sanitizedSubName__$($sub.Id)_Invoices.csv"
         $invoices | Select-Object InvoiceName, InvoicePeriodStartDate, InvoicePeriodEndDate, AmountDue, Status | Export-Csv -Path $csvPath -NoTypeInformation
         Write-Host "Exported invoices to $csvPath"
-        $exportSummary += [PSCustomObject]@{ Subscription = $sub.Name; Exported = $invoices.Count; Status = "Exported" }
     }
     else {
         Write-Host "No invoices found for subscription $($sub.Name)."
